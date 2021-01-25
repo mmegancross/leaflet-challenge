@@ -1,5 +1,5 @@
 // Store our API endpoint inside queryUrl
-var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson";
+var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson";
 
 // Perform a GET request to the query URL
 d3.json(queryUrl, function(data) {
@@ -11,20 +11,38 @@ function createFeatures(earthquakeData) {
 
   // Define a function we want to run once for each feature in the features array
   // Give each feature a popup describing the place and time of the earthquake
-  function onEachFeature(feature, layer) {
-    layer.bindPopup("<h3>" + feature.properties.place +
-      "</h3><hr><p>" + new Date(feature.properties.time) + "</p>");
+    var earthquakes = L.geoJSON(earthquakeData, {
+      onEachFeature: function(feature, layer) {
+        layer.bindPopup("<h3>" + feature.properties.place + "</br>" + "Magnitude: " + (feature.properties.mag) +
+            "</h3><hr><p>" + new Date(feature.properties.time) + "</p>");
+    },
+
+        pointToLayer: function (feature, latlng) {
+            return new L.circleMarker(latlng,
+            {radius: getRadius(feature.properties.mag),
+            fillColor: getColor(feature.properties.mag),
+            fillOpacity: .8,
+            color: getColor(feature.properties.mag),
+            stroke: true,
+            weight: .8
+        })
+        }
+        });
+
+    createMap(earthquakes);
   }
+  
 
-  // Create a GeoJSON layer containing the features array on the earthquakeData object
-  // Run the onEachFeature function once for each piece of data in the array
-  var earthquakes = L.geoJSON(earthquakeData, {
-    onEachFeature: onEachFeature
-  });
+//   // Create a GeoJSON layer containing the features array on the earthquakeData object
+//   // Run the onEachFeature function once for each piece of data in the array
+//   var earthquakes = L.geoJSON(earthquakeData, {
+//     onEachFeature: onEachFeature
+//     style: mapStyle
+//   });
 
-  // Sending our earthquakes layer to the createMap function
-  createMap(earthquakes);
-}
+//   // Sending our earthquakes layer to the createMap function
+ 
+// }
 
 function createMap(earthquakes) {
 
@@ -72,3 +90,29 @@ function createMap(earthquakes) {
     collapsed: false
   }).addTo(myMap);
 }
+
+// Create color function
+function getColor(magnitude) {
+    if (magnitude > 7) {
+        return '#cc0000'
+    } else if(magnitude > 6) {
+        return '#e50000'
+    } else if (magnitude > 5) {
+        return '#ff0000' 
+    } else if (magnitude > 4) {
+        return '#ff8000'
+    } else if (magnitude > 3) {
+        return '#f45d1b' 
+    } else if (magnitude > 2) {
+        return '#FFA500'
+    } else if (magnitude > 1) {
+        return '#80ff00'
+    } else {
+        return '#00ffff'
+    }
+};
+
+//Create radius function
+function getRadius(magnitude) {
+    return magnitude * 3;
+};
