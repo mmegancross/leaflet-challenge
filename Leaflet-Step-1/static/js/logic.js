@@ -89,9 +89,33 @@ function createMap(earthquakes) {
   L.control.layers(baseMaps, overlayMaps, {
     collapsed: false
   }).addTo(myMap);
+
+  //Create legend
+  var legend = L.control({
+    position: 'bottomleft'
+  });
+
+  legend.onAdd = function(myMap) {
+
+    var div = L.DomUtil.create('div', 'info legend'),
+        grades = [0, 1, 2, 3, 4, 5, 6, 7],
+        labels = [];
+
+    // loop through our density intervals and generate a label with a colored square for each interval
+    for (var i = 0; i < grades.length; i++) {
+        div.innerHTML +=
+            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+    }
+
+    return div;
+};
+
+legend.addTo(myMap);
+
 }
 
-// Create color function
+// Create magnitude/color function
 function getColor(magnitude) {
     if (magnitude > 7) {
         return '#cc0000'
@@ -100,9 +124,9 @@ function getColor(magnitude) {
     } else if (magnitude > 5) {
         return '#ff0000' 
     } else if (magnitude > 4) {
-        return '#ff8000'
+        return '#f45d1b'
     } else if (magnitude > 3) {
-        return '#f45d1b' 
+        return  '#ff8000' 
     } else if (magnitude > 2) {
         return '#FFA500'
     } else if (magnitude > 1) {
@@ -112,7 +136,7 @@ function getColor(magnitude) {
     }
 };
 
-//Create radius function
+//Create magnitude/radius function
 function getRadius(magnitude) {
     return magnitude * 3;
 };
